@@ -1,0 +1,5 @@
+confluence_url: https://mysample.atlassian.net
+confluence_space: SA
+counfluence_parent_page_id: 1835086
+github_folder_with_md_files: ./test-data/
+git_repo_name: node-app/
