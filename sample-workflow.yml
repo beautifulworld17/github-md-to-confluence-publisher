@@ -1,0 +1,50 @@
+name: Update and maintain .md Files in confluence
+
+on:
+  push:
+    paths:
+      - '**/*.md'
+    branches:
+      - main
+
+jobs:
+    changed_files:
+        runs-on: ubuntu-latest
+        env:
+          CONF_USER: '${{ secrets.CONFLUENCE_USER_EMAIL }}'
+          CONF_TOKEN: '${{ secrets.CONFLUENCE_API_TOKEN }}'
+        defaults:
+          run:
+            working-directory: ./.github/confluence-publisher/
+        
+        steps:
+        - name: Checkout code from GitHub
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+
+        - name: Set up Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: 3.8
+
+        - name: Install Dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install -r ./publisher/requirements.txt
+
+        - name: Get changed Markdown files
+          id: changed-md-files
+          uses: tj-actions/changed-files@v40
+          with:
+            separator: ","
+            files: |
+               **.md
+
+        - name: Run Python script on .md change 
+          run: >
+            python3 ./publisher/main.py
+            --user=${{ env.CONF_USER }} --token=${{ env.CONF_TOKEN }}
+            --modified-files=${{ steps.changed-md-files.outputs.modified_files }}
+            --added-files=${{ steps.changed-md-files.outputs.added_files }}
+            --deleted-files=${{ steps.changed-md-files.outputs.deleted_files }}
